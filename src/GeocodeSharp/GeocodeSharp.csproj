@@ -52,21 +52,25 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnumUtils.cs" />
     <Compile Include="Google\AddressComponent.cs" />
     <Compile Include="Google\GeocodeClient.cs" />
+    <Compile Include="Google\GeocodeComponent.cs" />
+    <Compile Include="Google\GeocodeRequest.cs" />
     <Compile Include="Google\GeocodeResponse.cs" />
     <Compile Include="Google\GeocodeResult.cs" />
+    <Compile Include="Google\GeocodeReverseRequest.cs" />
     <Compile Include="Google\GeocodeStatus.cs" />
     <Compile Include="Google\GeoCoordinate.cs" />
     <Compile Include="Google\Geometry.cs" />
     <Compile Include="Google\GeoViewport.cs" />
-    <Compile Include="Google\IGeocodeClient.cs" />
     <Compile Include="Google\LocationType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

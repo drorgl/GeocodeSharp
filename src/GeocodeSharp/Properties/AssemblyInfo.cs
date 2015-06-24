@@ -34,3 +34,4 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.6.0")]
 [assembly: AssemblyFileVersion("1.0.6.0")]
+[assembly: InternalsVisibleTo("GeocodeSharp.Tests, PublicKey=00240000048000009400000006020000002400005253413100040000010001008dade1abf631387bbe1116c0d9b5cba48b292fb6649cc76c96f990a51befd5bffdb5e440c9112255faa4e7a1886fb042d8b48a620ee0e0514590dae10da046d445211badb63f5c30f7b93ff64c02b989b462434e68aca3b739c72cc36fd33b8c6e86be6da53d488a0c31e203d97c3ea5fff29a22a4e986cbbc5ce53ece1922a1")]

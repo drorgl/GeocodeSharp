@@ -64,6 +64,8 @@
     <Compile Include="Google\GeocodeClientTest.cs" />
     <Compile Include="Google\GeocodeResponseTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="EnumUtilsTest.cs" />
+    <Compile Include="settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="key.snk" />

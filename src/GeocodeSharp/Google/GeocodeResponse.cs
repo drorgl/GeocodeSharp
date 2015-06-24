@@ -1,31 +1,29 @@
-﻿using Newtonsoft.Json;
+﻿using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace GeocodeSharp.Google
 {
+    [DebuggerDisplay("Status = {Status}, Results.Length = {Results.Length}, ErrorMessage = {ErrorMessage}")]
     public class GeocodeResponse
     {
         [JsonProperty("results")]
         public GeocodeResult[] Results { get; set; }
 
-        [JsonIgnore]
-        public GeocodeStatus Status
-        {
-            get
-            {
-                switch (StatusText)
-                {
-                    case "OK": return GeocodeStatus.Ok;
-                    case "ZERO_RESULTS": return GeocodeStatus.ZeroResults;
-                    case "OVER_QUERY_LIMIT": return GeocodeStatus.OverQueryLimit;
-                    case "REQUEST_DENIED": return GeocodeStatus.RequestDenied;
-                    case "INVALID_REQUEST": return GeocodeStatus.InvalidRequest;
-                    case "UNKNOWN_ERROR": return GeocodeStatus.UnknownError;
-                    default: return GeocodeStatus.Unexpected;
-                }
-            }
-        }
-
+        /// <summary>
+        /// The "status" field within the Geocoding response object contains the 
+        /// status of the request, and may contain debugging information to help 
+        /// you track down why geocoding is not working. 
+        /// </summary>
         [JsonProperty("status")]
-        public string StatusText { get; set; }
+        public GeocodeStatus Status { get; set; }
+
+        /// <summary>
+        /// When the geocoder returns a status code other than OK, there may be an 
+        /// additional error_message field within the Geocoding response object. 
+        /// This field contains more detailed information about the reasons 
+        /// behind the given status code.
+        /// </summary>
+        [JsonProperty("error_message")]
+        public string ErrorMessage { get; set; }
     }
 }

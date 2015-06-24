@@ -5,9 +5,14 @@ namespace GeocodeSharp.Google
     public class GeoCoordinate
     {
         [JsonProperty("lat")]
-        public double Latitude { get; set; }
+        public decimal Latitude { get; set; }
 
         [JsonProperty("lng")]
-        public double Longitude { get; set; }
+        public decimal Longitude { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0},{1}", this.Latitude, this.Longitude);
+        }
     }
 }

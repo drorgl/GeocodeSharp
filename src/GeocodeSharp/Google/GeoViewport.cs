@@ -1,7 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace GeocodeSharp.Google
 {
+    [DebuggerDisplay("Northeast = {Northeast}, Southwest = {Southwest}")]
     public class GeoViewport
     {
         [JsonProperty("northeast")]

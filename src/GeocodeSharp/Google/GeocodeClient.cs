@@ -1,16 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Linq;
+using System.Diagnostics;
 
 namespace GeocodeSharp.Google
 {
     /// <summary>
     /// Encapsulates methods for executing geocode requests.
     /// </summary>
-    public class GeocodeClient : IGeocodeClient
+    [DebuggerDisplay("apikey = {_apiKey}")]
+    public class GeocodeClient 
     {
         private readonly string _apiKey;
         private readonly string _baseUrl;
@@ -28,10 +33,13 @@ namespace GeocodeSharp.Google
         /// Initialize GeocodeClient with your Google API key to utilize it in the requests to Google and bypass the default annonymous throttling.
         /// </summary>
         /// <param name="apiKey">Google Maps API Key</param>
-        public GeocodeClient(string apiKey)
+        public GeocodeClient(string apiKey) : this()
         {
-            _apiKey = apiKey;
-            _baseUrl = string.Format("https://maps.googleapis.com/maps/api/geocode/json?key={0}&", Uri.EscapeDataString(_apiKey));
+            if (!string.IsNullOrEmpty(apiKey))
+            {
+                _apiKey = apiKey;
+                _baseUrl = string.Format("https://maps.googleapis.com/maps/api/geocode/json?key={0}&", Uri.EscapeDataString(_apiKey));
+            }
         }
 
         /// <summary>
@@ -43,7 +51,40 @@ namespace GeocodeSharp.Google
         /// <returns>The geocode response.</returns>
         public async Task<GeocodeResponse> GeocodeAddress(string address, string region = null)
         {
-            var url = BuildUrl(address, region);
+            var nvc = new NameValueCollection();
+            if (!string.IsNullOrEmpty(address))
+            {
+                nvc.Add("address",address);
+            }
+            if (!string.IsNullOrEmpty(region))
+            {
+                nvc.Add("region", region);
+            }
+            return await GeocodeRequest(nvc);
+        }
+
+        /// <summary>
+        ///  Calls Google's geocode API with specific request parameters
+        /// </summary>
+        /// <returns>The geocode response.</returns>
+        public async Task<GeocodeResponse> GeocodeRequest(GeocodeRequest request)
+        {
+            return await GeocodeRequest(request.ToNameValueCollection());
+        }
+
+        /// <summary>
+        ///  Calls Google's geocode reverse API with specific request parameters
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<GeocodeResponse> GeocodeRequest(GeocodeReverseRequest request)
+        {
+            return await GeocodeRequest(request.ToNameValueCollection());
+        }
+
+        public async Task<GeocodeResponse> GeocodeRequest(NameValueCollection nvc)
+        {
+            var url = BuildGeocodeUrl(nvc);
 
             string json;
             var request = WebRequest.CreateHttp(url);
@@ -60,17 +101,61 @@ namespace GeocodeSharp.Google
             return JsonConvert.DeserializeObject<GeocodeResponse>(json);
         }
 
-        private string BuildUrl(string address, string region)
+        /// <summary>
+        /// The term geocoding generally refers to translating a human-readable address into a location on a map. The process of doing the opposite, translating a location on the map into a human-readable address, is known as reverse geocoding.
+        /// </summary>
+        /// <param name="latlng">The latitude and longitude values specifying the location for which you wish to obtain the closest, human-readable address.</param>
+        /// <returns>The geocode response.</returns>
+        public async Task<GeocodeResponse> GeocodeReverse(GeoCoordinate latlng)
         {
-            if (address == null) throw new ArgumentNullException("address");
+            var nvc = new NameValueCollection {{"latlng",latlng.ToString()}};
+            return await GeocodeRequest(nvc);
+        }
 
-            if (string.IsNullOrWhiteSpace(region))
+        /// <summary>
+        /// The term geocoding generally refers to translating a human-readable address into a location on a map. The process of doing the opposite, translating a location on the map into a human-readable address, is known as reverse geocoding.
+        /// </summary>
+        /// <param name="placeid">The place ID of the place for which you wish to obtain the human-readable address. The place ID is a unique identifier that can be used with other Google APIs. For example, you can use the placeID returned by the Google Maps Roads API to get the address for a snapped point. For more information about place IDs, see the place ID overview.</param>
+        /// <returns>The geocode response.</returns>
+        public async Task<GeocodeResponse> GeocodeReverse(string placeid)
+        {
+            var nvc = new NameValueCollection { { "place_id",placeid} };
+            return await GeocodeRequest(nvc);
+        }
+
+        private string BuildGeocodeUrl(NameValueCollection nvcParameters)
+        {
+            if (nvcParameters.Count == 0)
             {
-                return string.Concat(_baseUrl, string.Format("address={0}", Uri.EscapeDataString(address)));
+                throw new ArgumentNullException();
             }
 
-            return string.Concat(_baseUrl,
-                string.Format("address={0}&region={1}", Uri.EscapeDataString(address), Uri.EscapeDataString(region)));
+            UriBuilder uri = new UriBuilder(_baseUrl);
+            
+            NameValueCollection nvc = new NameValueCollection(nvcParameters);
+
+            if (uri.Query != null)
+            {
+                foreach (var uparam in uri.Query.Trim(new char[] { '?', ' ', '&' }).Split('&'))
+                {
+                    if (uparam == "")
+                    {
+                        continue;
+                    }
+
+                    var usplit = uparam.Split('=');
+                    nvc.Set(usplit[0]
+                        , WebUtility.UrlDecode(usplit[1]));
+                }
+            }
+            
+            uri.Query = string.Join("&", 
+                nvc.AllKeys
+                .Where(key=>nvc.GetValues(key).Count() > 0 && nvc.GetValues(key).All(i=>!string.IsNullOrWhiteSpace(i))) 
+                .Select(key=>string.Format("{0}={1}", key,string.Join(",",nvc.GetValues(key))))
+                .ToArray());
+
+            return uri.ToString();
         }
     }
 }

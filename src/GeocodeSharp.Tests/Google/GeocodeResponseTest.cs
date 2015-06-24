@@ -15,7 +15,7 @@ namespace GeocodeSharp.Tests.Google
         {
             var before = new GeocodeResponse
             {
-                StatusText = "OK",
+                Status = GeocodeStatus.Ok
             };
             var json = JsonConvert.SerializeObject(before);
             dynamic after = JObject.Parse(json);
